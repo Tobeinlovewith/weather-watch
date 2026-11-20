@@ -1,0 +1,25 @@
+# 配置与状态（含密钥/个人数据）
+config.json
+state.json
+STOP
+GIVEUP
+kick_stats.json
+
+# 运行产物
+logs/
+*.log
+*.out
+*.err
+hb_*.txt
+nmc_index.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store

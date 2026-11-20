@@ -1,0 +1,96 @@
+{
+  "locations": [
+    {
+      "key": "bj-daxing",
+      "name": "北京·大兴",
+      "city_code": "101011100",
+      "lat": 39.725,
+      "lon": 116.325
+    }
+  ],
+  "qq": {
+    "targets": [
+      {
+        "kind": "private",
+        "id": 10000,
+        "locations": [
+          "bj-daxing"
+        ]
+      }
+    ]
+  },
+  "poll_minutes": 4,
+  "lead_minutes": 15,
+  "block_alert_hours": 3,
+  "quiet_hours": [],
+  "cooldown_minutes": 5,
+  "qweather": {
+    "key": "YOUR_QWEATHER_KEY",
+    "host": "your-host.qweatherapi.com"
+  },
+  "notify": {
+    "warnings": true
+  },
+  "planner": {
+    "scan_times": [
+      "00:00",
+      "12:00",
+      "18:00"
+    ],
+    "arm_lead_minutes": 30,
+    "armed_poll_minutes": 1,
+    "horizon_hours": 24,
+    "max_arm_hours": 8
+  },
+  "commands": {
+    "group_id": 0,
+    "prefix": "#",
+    "allow": [],
+    "owner": [
+      10000
+    ]
+  },
+  "briefing": {
+    "enabled": true,
+    "morning": "06:00",
+    "evening": "21:00",
+    "noon": "12:00"
+  },
+  "alert": {
+    "enabled": false,
+    "qq_offline_minutes": 5,
+    "heartbeat_daily": "",
+    "email": {
+      "smtp_host": "",
+      "port": "",
+      "user": "",
+      "pass": "",
+      "to": ""
+    },
+    "pushplus": {
+      "token": ""
+    },
+    "serverchan": {
+      "key": ""
+    },
+    "wecom": {
+      "webhook": ""
+    },
+    "dingtalk": {
+      "webhook": ""
+    },
+    "feishu": {
+      "webhook": ""
+    },
+    "bark": {
+      "url": ""
+    }
+  },
+  "qqofficial": {
+    "enabled": false,
+    "app_id": "",
+    "app_secret": "",
+    "alarm_user_openid": "",
+    "alarm_group_openid": ""
+  }
+}
