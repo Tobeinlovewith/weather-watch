@@ -210,27 +210,23 @@ def kill_all() -> int:
     return left
 
 
-def escalate(name: str) -> int:
+def escalate(name: str, port: int) -> None:
+    """只放弃这一个服务，不影响其它守护。"""
     log(f'【三次拉起失败】{name} 连续 {MAX_ATTEMPTS} 次启动后端口仍未就绪')
+    log(f'【动作】只结束 {name}（端口 {port}），其它服务继续运行')
+    killed = kill_port_owner(port)
+    log(f'  结束结果：{"成功" if killed else "端口仍被占用"}')
+    marker = os.path.join(BASE, f'GIVEUP-{name}')
+    try:
+        with open(marker, 'w', encoding='utf-8') as f:
+            f.write(f"{datetime.now():%Y-%m-%d %H:%M:%S} {name} 三次拉起失败，"
+                    f"{'已结束' if killed else '未能结束'}，停止自动拉起\n")
+    except Exception:
+        pass
     alert('天气守护启动失败',
-          f'{name} 连续 {MAX_ATTEMPTS} 次启动后端口仍未就绪，正在强制结束并放弃管理。')
-    left = kill_all()
-    if left > 0:
-        log(f'【强制结束失败】仍有 {left} 个端口在监听，无法结束')
-        try:
-            open(GIVEUP, 'w', encoding='utf-8').write(
-                f"{datetime.now():%Y-%m-%d %H:%M:%S} 三次拉起失败且无法结束，看门狗放弃管理\n")
-        except Exception:
-            pass
-        log('【放弃】已写入 GIVEUP，看门狗退出；人工删除 GIVEUP 后恢复')
-    else:
-        log('【已完成】全部守护进程已结束，看门狗退出')
-        try:
-            open(GIVEUP, 'w', encoding='utf-8').write(
-                f"{datetime.now():%Y-%m-%d %H:%M:%S} 三次拉起失败，已强制结束，等待人工处理\n")
-        except Exception:
-            pass
-    return 0
+          f'{name} 连续 {MAX_ATTEMPTS} 次启动后端口仍未就绪，已停止自动拉起。\n'
+          f'其它服务照常在跑。排查后可删除 GIVEUP-{name} 恢复。')
+    attempts[name] = 0
 
 
 def check_qq() -> None:
@@ -284,13 +280,20 @@ def main() -> int:
                     if not killed:
                         attempts[name] += 1
                         if attempts[name] >= MAX_ATTEMPTS:
-                            return escalate(name)
+                            escalate(name, port)
                         continue
                 attempts[name] = 0
                 continue
 
+            if os.path.exists(os.path.join(BASE, f'GIVEUP-{name}')):
+                if not globals().get(f"_giveup_logged_{name}"):
+                    log(f'{name} 已被放弃（GIVEUP-{name}），跳过')
+                    globals()[f"_giveup_logged_{name}"] = True
+                continue
+
             if attempts[name] >= MAX_ATTEMPTS:
-                return escalate(name)
+                escalate(name, port)
+                continue
 
             if count_pythonw() >= MAX_PYTHONW:
                 log(f'pythonw 已达 {MAX_PYTHONW} 个，暂不拉起 {name}')
