@@ -938,7 +938,7 @@ def build_briefing(cfg: dict, loc: dict, mode: str, now: datetime, log) -> str |
         log.warning("[%s] 播报取数失败：%s", loc["key"], exc)
         return None
     sk, warnings, daily = cn_state(loc, log)
-    target_day = now if mode == "morning" else now + timedelta(days=1)
+    target_day = now + timedelta(days=1) if mode == "evening" else now
     day_rows = rows_of_day(rows, target_day, now)
     if not day_rows:
         return None

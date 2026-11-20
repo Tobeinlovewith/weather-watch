@@ -76,6 +76,46 @@ def state_summary() -> dict:
             "outbox": len(st.get("outbox") or [])}
 
 
+
+PORT_SCRIPT = {47820: "watchdog.pyw", 47821: "rain_watch.py",
+               47822: "cmd_listener.py", 47825: "qqbot_service.py"}
+
+
+def stale_code_report() -> str:
+    """比对代码修改时间 vs 进程启动时间，提示哪些改动还没生效。"""
+    import subprocess as _sp
+    lines = []
+    try:
+        for port, script in PORT_SCRIPT.items():
+            f = BASE / script
+            if not f.exists():
+                continue
+            code_mtime = f.stat().st_mtime
+            ps = (f"$c = Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | "
+                  f"Where-Object {{ $_.LocalPort -eq {port} }} | "
+                  f"Select-Object -ExpandProperty OwningProcess -Unique; "
+                  f"foreach ($p in $c) {{ (Get-Process -Id $p).StartTime.ToUniversalTime().ToString('o') }}")
+            try:
+                out = _sp.run(["powershell", "-NoProfile", "-Command", ps],
+                              capture_output=True, text=True, timeout=15,
+                              creationflags=0x08000000).stdout.strip()
+            except Exception:
+                out = ""
+            if not out:
+                continue
+            from datetime import timezone
+            try:
+                started = datetime.strptime(out.split(".")[0], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+            except Exception:
+                continue
+            if started.timestamp() < code_mtime - 2:
+                gap = int((code_mtime - started.timestamp()) / 60)
+                lines.append(f"  ⚠️ {script} 代码比进程新 {gap} 分钟 → 需要重启")
+    except Exception:
+        pass
+    return "\n".join(lines)
+
+
 def cmd_status() -> str:
     lines = [f"【QQ 通道体检】{datetime.now():%Y-%m-%d %H:%M:%S}"]
     qq = qq_count()
@@ -104,6 +144,10 @@ def cmd_status() -> str:
     else:
         verdict = "⚠️ 通道在但守护有异常"
     lines.append(f"结论：{verdict}")
+    stale = stale_code_report()
+    if stale:
+        lines.append("代码新旧自检：")
+        lines.append(stale)
     return "\n".join(lines)
 
 

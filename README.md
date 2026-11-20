@@ -102,7 +102,7 @@
 | `watchdog.pyw` | 看门狗：进程守护 + 假死检测 + 告警分流 |
 | `ws_send.py` | 极简 OneBot WebSocket 客户端 |
 | `city_cli.py` | 城市增删（调和风 GeoAPI） |
-| `tests/test_weather.py` | 离线单元测试（24 个） |
+| `tests/test_weather.py` | 离线单元测试（44 个） |
 
 ## 快速开始
 
@@ -147,6 +147,11 @@ python rain_watch.py --check       # 检查数据源连通性
 ```bash
 python -m unittest discover -s tests -v
 ```
+
+## 文档
+
+- [运维手册](docs/运维手册.md)：进程拓扑、故障排查表、告警链路、数据源、改代码纪律
+- [架构说明](docs/架构.md)：数据流、城市状态机、三级审查、可靠性设计、已知取舍
 
 ## 运维
 
